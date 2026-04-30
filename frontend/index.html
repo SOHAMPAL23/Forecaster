@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BTC Quant Forecaster — 95% CI Range Engine</title>
+  <meta name="description" content="Professional Bitcoin 1-hour price range forecasting with 95% confidence intervals, Monte Carlo simulation, regime detection and live backtest metrics." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.1/dist/chartjs-chart-financial.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>₿</text></svg>">
+  <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+  <!-- Animated grid background -->
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="glow-orb orb-1" aria-hidden="true"></div>
+  <div class="glow-orb orb-2" aria-hidden="true"></div>
+
+  <!-- ══════════════ HEADER ══════════════ -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="15" stroke="url(#brandGrad)" stroke-width="1.5"/>
+            <path d="M11 10h7a3 3 0 010 6H11v6" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M11 16h8a3 3 0 010 6H11" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="13.5" y1="8" x2="13.5" y2="25" stroke="url(#brandGrad)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="17.5" y1="8" x2="17.5" y2="25" stroke="url(#brandGrad)" stroke-width="1.5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="brandGrad" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#f7931a"/>
+                <stop offset="1" stop-color="#ff6b35"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">BTC Quant Forecaster</h1>
+          <p class="brand-sub">Monte Carlo · Regime Detection · 95% CI Engine</p>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="live-badge" id="liveBadge">
+          <span class="live-dot"></span>
+          <span class="live-text">LIVE</span>
+        </div>
+        <div class="header-price-block">
+          <span class="header-price" id="headerPrice">—</span>
+          <span class="header-change" id="headerChange">—</span>
+        </div>
+        <div class="update-info">
+          <span id="lastUpdate">Initializing…</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <main class="main-grid">
+
+    <!-- ── Row 1: KPI cards ── -->
+    <section class="kpi-row" aria-label="Key metrics">
+      <div class="kpi-card" id="kpiPrice">
+        <div class="kpi-label">Live BTC Price</div>
+        <div class="kpi-value" id="kpiPriceVal">—</div>
+        <div class="kpi-sub" id="kpiPriceSub">Loading…</div>
+      </div>
+      <div class="kpi-card accent-teal" id="kpiLower">
+        <div class="kpi-label">Forecast Lower (95% CI)</div>
+        <div class="kpi-value" id="kpiLowerVal">—</div>
+        <div class="kpi-sub" id="kpiLowerSub">—</div>
+      </div>
+      <div class="kpi-card accent-violet" id="kpiUpper">
+        <div class="kpi-label">Forecast Upper (95% CI)</div>
+        <div class="kpi-value" id="kpiUpperVal">—</div>
+        <div class="kpi-sub" id="kpiUpperSub">—</div>
+      </div>
+      <div class="kpi-card accent-amber" id="kpiWidth">
+        <div class="kpi-label">Interval Width</div>
+        <div class="kpi-value" id="kpiWidthVal">—</div>
+        <div class="kpi-sub" id="kpiWidthSub">—</div>
+      </div>
+    </section>
+
+    <!-- ── Row 2: Chart + model info ── -->
+    <section class="chart-section">
+      <div class="chart-card main-chart-card">
+        <div class="card-header">
+          <h2 class="card-title">Price Chart + 95% Confidence Band</h2>
+          <div class="chart-controls">
+            <span class="regime-badge" id="regimeBadge">—</span>
+            <span class="calib-badge" id="calibBadge">calib: —</span>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="priceChart"></canvas>
+        </div>
+      </div>
+
+      <div class="model-panel">
+        <!-- Model parameters -->
+        <div class="info-card">
+          <div class="card-header">
+            <h2 class="card-title">Model Parameters</h2>
+          </div>
+          <div class="param-grid">
+            <div class="param-row">
+              <span class="param-label">Regime</span>
+              <span class="param-val regime-val" id="paramRegime">—</span>
+            </div>
+            <div class="param-row">
+              <span class="param-label">Volatility (σ)</span>
+              <span class="param-val mono" id="paramSigma">—</span>
+            </div>
+            <div class="param-row">
+              <span class="param-label">Student-t ν (df)</span>
+              <span class="param-val mono" id="paramDf">—</span>
+            </div>
+            <div class="param-row">
+              <span class="param-label">Drift (μ)</span>
+              <span class="param-val mono" id="paramMu">—</span>
+            </div>
+            <div class="param-row">
+              <span class="param-label">Calib. Factor</span>
+              <span class="param-val mono" id="paramCalib">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backtest metrics -->
+        <div class="info-card backtest-card">
+          <div class="card-header">
+            <h2 class="card-title">Backtest Metrics</h2>
+            <span class="bt-sub">720-bar walk-forward</span>
+          </div>
+          <div class="metric-gauges">
+            <div class="gauge-item">
+              <div class="gauge-ring" id="coverageGauge">
+                <svg viewBox="0 0 80 80">
+                  <circle class="gauge-bg" cx="40" cy="40" r="32" />
+                  <circle class="gauge-fill" id="coverageFill" cx="40" cy="40" r="32"
+                    stroke-dasharray="0 201" />
+                </svg>
+                <div class="gauge-center">
+                  <span class="gauge-val" id="coverageVal">—</span>
+                  <span class="gauge-unit">%</span>
+                </div>
+              </div>
+              <p class="gauge-label">Coverage</p>
+              <p class="gauge-target">Target: 95%</p>
+            </div>
+
+            <div class="gauge-item">
+              <div class="gauge-ring">
+                <svg viewBox="0 0 80 80">
+                  <circle class="gauge-bg" cx="40" cy="40" r="32" />
+                  <circle class="gauge-fill gauge-teal" id="widthFill" cx="40" cy="40" r="32"
+                    stroke-dasharray="0 201" />
+                </svg>
+                <div class="gauge-center">
+                  <span class="gauge-val" id="widthVal">—</span>
+                  <span class="gauge-unit">$</span>
+                </div>
+              </div>
+              <p class="gauge-label">Avg Width</p>
+              <p class="gauge-target">Lower = better</p>
+            </div>
+
+            <div class="gauge-item">
+              <div class="gauge-ring">
+                <svg viewBox="0 0 80 80">
+                  <circle class="gauge-bg" cx="40" cy="40" r="32" />
+                  <circle class="gauge-fill gauge-violet" id="winklerFill" cx="40" cy="40" r="32"
+                    stroke-dasharray="0 201" />
+                </svg>
+                <div class="gauge-center">
+                  <span class="gauge-val" id="winklerVal">—</span>
+                  <span class="gauge-unit">$</span>
+                </div>
+              </div>
+              <p class="gauge-label">Winkler Score</p>
+              <p class="gauge-target">Lower = better</p>
+            </div>
+          </div>
+
+          <div class="bt-samples">
+            <span>Backtest samples: </span>
+            <strong id="btSamples">—</strong>
+          </div>
+        </div>
+
+        <!-- 24h stats -->
+        <div class="info-card stats-card">
+          <div class="card-header">
+            <h2 class="card-title">24h Statistics</h2>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">24h High</span>
+            <span class="stat-val green" id="stat24hHigh">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">24h Low</span>
+            <span class="stat-val red" id="stat24hLow">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Change %</span>
+            <span class="stat-val" id="stat24hChange">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Volume</span>
+            <span class="stat-val" id="stat24hVol">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Row 3: Backtest detail chart ── -->
+    <section class="bottom-row">
+      <div class="chart-card bt-chart-card">
+        <div class="card-header">
+          <h2 class="card-title">Backtest — Predictions vs Actuals (Last 100 bars)</h2>
+          <div class="legend-row">
+            <span class="legend-item"><span class="legend-dot" style="background:#f7931a"></span>Actual</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#00d4ff"></span>Lower CI</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>Upper CI</span>
+            <span class="legend-item"><span class="legend-dot" style="background:rgba(0,212,255,0.15)"></span>CI Band</span>
+          </div>
+        </div>
+        <div class="chart-wrap" style="height:260px">
+          <canvas id="btChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card regime-chart-card">
+        <div class="card-header">
+          <h2 class="card-title">Volatility Regime Distribution</h2>
+        </div>
+        <div class="chart-wrap" style="height:260px;display:flex;align-items:center;justify-content:center;">
+          <canvas id="regimeChart" style="max-width:220px;max-height:220px;"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="footer">
+    <p>Data sourced from Binance Public API · Monte Carlo N=10,000 · 95% Student-t Confidence Intervals · Walk-Forward Backtest</p>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="static/app.js"></script>
+</body>
+</html>
