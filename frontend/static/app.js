@@ -71,33 +71,33 @@ function initPriceChart() {
         {
           label: 'Close Price',
           data: [],
-          borderColor: '#f7931a',
-          borderWidth: 2,
+          borderColor: '#eab308', /* New accent gold */
+          borderWidth: 1.5,
           pointRadius: 0,
-          tension: 0.3,
+          tension: 0, /* Sharp edges */
           fill: false,
           order: 1,
         },
         {
           label: 'Upper CI',
           data: [],
-          borderColor: 'rgba(167,139,250,0.7)',
-          borderWidth: 1.5,
-          borderDash: [6, 4],
+          borderColor: 'rgba(139, 92, 246, 0.6)', /* Violet */
+          borderWidth: 1,
+          borderDash: [4, 4],
           pointRadius: 0,
-          tension: 0.3,
+          tension: 0,
           fill: '+1',
-          backgroundColor: 'rgba(100,130,255,0.08)',
+          backgroundColor: 'rgba(139, 92, 246, 0.05)',
           order: 2,
         },
         {
           label: 'Lower CI',
           data: [],
-          borderColor: 'rgba(0,212,255,0.7)',
-          borderWidth: 1.5,
-          borderDash: [6, 4],
+          borderColor: 'rgba(6, 182, 212, 0.6)', /* Teal */
+          borderWidth: 1,
+          borderDash: [4, 4],
           pointRadius: 0,
-          tension: 0.3,
+          tension: 0,
           fill: false,
           order: 2,
         },
@@ -124,13 +124,13 @@ function initPriceChart() {
       },
       scales: {
         x: {
-          ticks: { color: '#475569', font: { size: 10, family: 'Inter' }, maxTicksLimit: 8, maxRotation: 0 },
-          grid:  { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#64748b', font: { size: 10, family: 'Inter' }, maxTicksLimit: 8, maxRotation: 0 },
+          grid:  { color: 'rgba(255,255,255,0.02)' },
         },
         y: {
           position: 'right',
-          ticks: { color: '#475569', font: { size: 10, family: 'JetBrains Mono' }, callback: v => '$' + (v/1000).toFixed(1) + 'K' },
-          grid:  { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#64748b', font: { size: 10, family: 'JetBrains Mono' }, callback: v => '$' + (v/1000).toFixed(1) + 'K' },
+          grid:  { color: 'rgba(255,255,255,0.02)' },
         }
       }
     }
@@ -171,33 +171,33 @@ function initBtChart() {
         {
           label: 'Actual',
           data: [],
-          borderColor: '#f7931a',
-          borderWidth: 2,
+          borderColor: '#eab308',
+          borderWidth: 1.5,
           pointRadius: 0,
-          tension: 0.2,
+          tension: 0,
           fill: false,
           order: 1,
         },
         {
           label: 'Upper CI',
           data: [],
-          borderColor: 'rgba(167,139,250,0.6)',
+          borderColor: 'rgba(139, 92, 246, 0.4)',
           borderWidth: 1,
-          borderDash: [4, 3],
+          borderDash: [3, 3],
           pointRadius: 0,
-          tension: 0.2,
+          tension: 0,
           fill: '+1',
-          backgroundColor: 'rgba(0,212,255,0.07)',
+          backgroundColor: 'rgba(6, 182, 212, 0.05)',
           order: 2,
         },
         {
           label: 'Lower CI',
           data: [],
-          borderColor: 'rgba(0,212,255,0.6)',
+          borderColor: 'rgba(6, 182, 212, 0.4)',
           borderWidth: 1,
-          borderDash: [4, 3],
+          borderDash: [3, 3],
           pointRadius: 0,
-          tension: 0.2,
+          tension: 0,
           fill: false,
           order: 2,
         },
@@ -257,11 +257,11 @@ function initRegimeChart() {
       datasets: [{
         data: [1, 1, 1],
         backgroundColor: [
-          'rgba(0,212,255,0.8)',
-          'rgba(251,191,36,0.8)',
-          'rgba(247,147,26,0.8)',
+          'rgba(6, 182, 212, 0.8)',   /* Teal - Calm */
+          'rgba(245, 158, 11, 0.8)',  /* Amber - Medium */
+          'rgba(234, 179, 8, 0.8)',   /* Gold - Volatile */
         ],
-        borderColor: '#070b14',
+        borderColor: '#030509',
         borderWidth: 3,
         hoverOffset: 8,
       }]
