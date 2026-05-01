@@ -7,7 +7,6 @@
 
 A high-precision, quantitative Bitcoin price range forecasting system built for professional risk modeling. It produces a **well-calibrated 95% confidence interval** for the next 1-hour BTCUSDT price using probabilistic modeling and Monte Carlo simulations.
 
-![Dashboard Preview](https://github.com/user-attachments/assets/your-screenshot-placeholder)
 
 ## 🚀 Key Features & Quantitative Edge
 
@@ -88,6 +87,3 @@ The system is rigorously designed to act as a reliable trading risk model using 
         ├── style.css     # Premium dark mode styling & animations
         └── app.js        # Real-time charting, DOM updates & API logic
 ```
-
----
-*Built for quantitative traders and risk managers requiring robust tail-risk estimation.*
