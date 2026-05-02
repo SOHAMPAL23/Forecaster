@@ -17,7 +17,7 @@ async def fetch_klines_async(
     interval: str = INTERVAL,
     limit: int = 900
 ) -> List[dict]:
-    """Fetch klines asynchronously from Binance."""
+    # Fetch klines asynchronously from Binance
     url    = f"{BINANCE_BASE}/api/v3/klines"
     params = {"symbol": symbol, "interval": interval, "limit": limit}
 
@@ -34,7 +34,6 @@ def fetch_klines_sync(
     interval: str = INTERVAL,
     limit: int = 900
 ) -> List[dict]:
-    """Sync wrapper around the async fetcher."""
     try:
         loop = asyncio.get_event_loop()
         if loop.is_running():
@@ -64,7 +63,6 @@ def _parse_klines(raw: List[list]) -> List[dict]:
 
 
 def klines_to_arrays(klines: List[dict]) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Extract O/H/L/C numpy arrays from list of kline dicts."""
     opens  = np.array([k["open"]  for k in klines], dtype=np.float64)
     highs  = np.array([k["high"]  for k in klines], dtype=np.float64)
     lows   = np.array([k["low"]   for k in klines], dtype=np.float64)
@@ -73,7 +71,7 @@ def klines_to_arrays(klines: List[dict]) -> Tuple[np.ndarray, np.ndarray, np.nda
 
 
 async def fetch_ticker_price(symbol: str = SYMBOL) -> float:
-    """Fetch current ticker price."""
+    # Fetch current ticker price.
     url = f"{BINANCE_BASE}/api/v3/ticker/price"
     async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.get(url, params={"symbol": symbol})
@@ -82,7 +80,7 @@ async def fetch_ticker_price(symbol: str = SYMBOL) -> float:
 
 
 async def fetch_24h_stats(symbol: str = SYMBOL) -> Dict:
-    """Fetch 24-hour statistics."""
+    # Fetch 24-hour statistics
     url = f"{BINANCE_BASE}/api/v3/ticker/24hr"
     async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.get(url, params={"symbol": symbol})

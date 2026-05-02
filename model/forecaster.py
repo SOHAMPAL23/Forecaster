@@ -30,9 +30,7 @@ EWMA_SLOW      = 26
 ROLL_WINDOWS   = [10, 20, 50]
 
 
-# ─────────────────────────────────────────────
 #  Data classes
-# ─────────────────────────────────────────────
 @dataclass
 class VolatilityFeatures:
     sigma_fast:    float   # EWMA fast
@@ -144,10 +142,14 @@ def extract_features(closes: np.ndarray,
         atr=atr, regime=reg, df=df
     )
 
+<<<<<<< Updated upstream
 
 # ─────────────────────────────────────────────
 #  Drift estimation with shrinkage
 # ─────────────────────────────────────────────
+=======
+#  Drift estimation
+>>>>>>> Stashed changes
 
 def estimate_drift(returns: np.ndarray, window: int = 50) -> float:
     # Rolling mean of log returns, shrunk towards zero to
@@ -159,6 +161,10 @@ def estimate_drift(returns: np.ndarray, window: int = 50) -> float:
 def regime_sigma_scale(regime: str) -> float:
     return {"calm": 0.85, "medium": 1.0, "volatile": 1.30}[regime]
 
+<<<<<<< Updated upstream
+=======
+#  Monte Carlo with Jump Diffusion
+>>>>>>> Stashed changes
 
 def simulate_paths(
     last_price: float,
@@ -195,10 +201,12 @@ def simulate_paths(
 
     return np.concatenate([prices_t, prices_b])
 
+<<<<<<< Updated upstream
 
 # ─────────────────────────────────────────────
+=======
+>>>>>>> Stashed changes
 #  Forecaster class
-# ─────────────────────────────────────────────
 
 class BTCForecaster:
     """
